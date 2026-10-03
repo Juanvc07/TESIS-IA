@@ -18,6 +18,40 @@ Este proyecto de tesis propone e implementa un marco metodológico híbrido, jer
 
 ---
 
+Planteamiento de la Problemática
+En la industria de la construcción y el modelado BIM (Building Information Modeling), el diseño y la coordinación de las instalaciones electromecánicas (MEP) se realiza de forma mayoritariamente manual, fragmentada y reactiva:
+
+
+	Coordinación Espacial Reactiva e Iterativa:
+
+Los proyectistas eléctricos modelan las canalizaciones de forma aislada. La detección de interferencias (clash detection) se efectúa en etapas tardías mediante software de coordinación (como Navisworks o Solibri). Este enfoque reactivo genera decenas de colisiones que requieren múltiples reuniones de compatibilización y semanas de rediseño manual, trasladando frecuentemente indefiniciones e interferencias no detectadas a la etapa de ejecución en obra.
+
+	Saturación Crítica en Plenos Técnicos Hospitalarios (Categoría III-1):
+
+En establecimientos de salud de alta complejidad (Categoría III-1), el espacio disponible entre el falso cielo raso y las estructuras portantes (vigas y losas) presenta una densidad extrema de redes. Las canalizaciones eléctricas deben compartir corredores congestionados con ductos masivos de climatización (HVAC), redes contraincendios por gravedad, vapor y gases medicinales. Al no existir un ruteo automatizado que considere el espacio libre real, las bandejas eléctricas suelen invadir zonas prohibidas o quedar inaccesibles para mantenimiento.
+
+	Inviabilidad Constructiva e Incumplimiento Normativo de Herramientas Convencionales:
+
+Los algoritmos genéricos de búsqueda de caminos (como A^* básico o líneas ortogonales simples) y las herramientas de ruteo automático comercial fallan en incorporar las restricciones físicas reales de la ingeniería eléctrica:
+
+
+	Radio de curvatura mínimo: No consideran la rigidez mecánica de alimentadores de gran calibre (como 500" kcmil"  o 250" kcmil" ), generando giros bruscos que dañan el aislamiento dieléctrico.
+
+	Catálogo prefabricado: Proponen deflexiones angulares arbitrarias incompatibles con los accesorios comerciales estandarizados (30^∘, 45^∘, 60^∘ y 90^∘).
+
+	Espacios de mantenimiento (Clearances): Omiten la holgura superior libre de al menos 300" mm"  exigida por la norma NEMA VE 2 para el peinado, tendido e inspección de cables.
+
+	Capacidad de llenado: Ignoran el dimensionamiento dinámico según el Código Eléctrico Nacional (NEC Artículo 392).
+
+	Falta de Agrupamiento Estratégico (Bundling):
+
+Cuando se proyectan múltiples alimentadores que van desde una subestación principal hacia diversos tableros de distribución, los trazados tradicionales trazan cada ruta de forma independiente. Esto genera una dispersión innecesaria de canalizaciones pequeñas, incrementando el costo de soportería estructural, saturando los pasillos técnicos y desperdiciando metros lineales de bandeja.
+
+	Cuello de Botella Computacional en Software Propietario:
+
+Los intentos previos de automatización mediante macros o scripts directos dentro de las APIs de software comercial (como Autodesk Revit) colapsan debido a la latencia de entrada/salida (I/O), el alto consumo de memoria y la sobreestimación geométrica generada por cajas delimitadoras (Bounding Boxes), imposibilitando la convergencia de modelos avanzados de optimización o Inteligencia Artificial.
+
+
 ## Casos de Estudio y Obtención de Datos
 
 ### 1. Casos de Estudio: Infraestructura Hospitalaria Compleja (Categoría III-1)
