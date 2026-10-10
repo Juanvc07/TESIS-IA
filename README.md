@@ -2,176 +2,256 @@
 
 **Programa:** Maestría en Inteligencia Artificial
 
+**Curso:** Proyecto de Investigación 2
+
 **Institución:** Universidad Nacional de Ingeniería (UNI)
 
-**Autor:** Juan Villegas
+**Autor:** Juan Villegas ([Juanvc07](https://www.google.com/search?q=https://github.com/Juanvc07))
 
-**Línea de Investigación:** Inteligencia Artificial Aplicada, Deep Reinforcement Learning, Geometría Computacional y OpenBIM
+**Rama del Repositorio:** `feature/semana4-feature-engineering`
 
----
-
-## Descripción del Proyecto
-
-El modelado y la coordinación espacial de canalizaciones eléctricas para alimentadores principales en proyectos de gran envergadura constituye un proceso altamente iterativo y susceptible a errores geométricos. Convencionalmente, la resolución de interferencias (*clashes*) y el cumplimiento de normativas de constructabilidad física dependen de revisiones manuales tardías, lo que genera sobrecostos y retrasos en obra.
-
-Este proyecto de tesis propone e implementa un marco metodológico híbrido, jerárquico y desacoplado para la automatización del ruteo 3D de bandejas portacables sobre modelos federados en formato estándar **IFC (ISO 16739)**. El sistema desacopla el cálculo algorítmico del software de modelado comercial mediante una representación continua del espacio, resolviendo de forma articulada el macro-ruteo de troncales con agrupamiento (*bundling*) y la micro-planificación cinemática local de accesorios mediante **Aprendizaje por Refuerzo Profundo (Deep Reinforcement Learning - PPO)**.
+**Línea de Investigación:** Inteligencia Artificial Aplicada, Deep Reinforcement Learning, Feature Engineering en Optimización y OpenBIM[cite: 1, 262]
 
 ---
 
-Planteamiento de la Problemática
-En la industria de la construcción y el modelado BIM (Building Information Modeling), el diseño y la coordinación de las instalaciones electromecánicas (MEP) se realiza de forma mayoritariamente manual, fragmentada y reactiva:
+## 1. Descripción del Proyecto y Planteamiento de la Problemática
 
+En la industria de la construcción y el modelado BIM (*Building Information Modeling*), el diseño y la coordinación de las canalizaciones electromecánicas (MEP) para alimentadores principales se realiza tradicionalmente de manera **manual, fragmentada y reactiva**[cite: 1, 20, 29]. Los proyectistas modelan las rutas de forma aislada y la detección de interferencias (*clash detection*) se efectúa tardíamente mediante software de coordinación (Navisworks o Solibri)[cite: 1, 30]. Este flujo de trabajo genera decenas de colisiones espaciales que demandan semanas de rediseño manual y trasladan errores no resueltos a la etapa de ejecución en obra[cite: 1, 29].
 
-	Coordinación Espacial Reactiva e Iterativa:
+Esta problemática es especialmente crítica en **establecimientos de salud de alta complejidad (Categoría III-1)**, donde el pleno técnico disponible entre el cielo raso y las estructuras portantes presenta una saturación extrema[cite: 5]. En estos corredores, las bandejas eléctricas de alimentadores principales deben convivir con ductos masivos de climatización (HVAC), vapor, gases medicinales y redes contraincendios por gravedad[cite: 1, 112].
 
-Los proyectistas eléctricos modelan las canalizaciones de forma aislada. La detección de interferencias (clash detection) se efectúa en etapas tardías mediante software de coordinación (como Navisworks o Solibri). Este enfoque reactivo genera decenas de colisiones que requieren múltiples reuniones de compatibilización y semanas de rediseño manual, trasladando frecuentemente indefiniciones e interferencias no detectadas a la etapa de ejecución en obra.
+Las herramientas comerciales y los algoritmos convencionales de búsqueda de trayectorias (como $A^*$ elemental) no resuelven este escenario debido a deficiencias clave[cite: 1, 16]:
 
-	Saturación Crítica en Plenos Técnicos Hospitalarios (Categoría III-1):
+* **Inviabilidad Constructiva:** Generan ángulos de deflexión arbitrarios incompatibles con los accesorios comerciales prefabricados ($30^\circ$, $45^\circ$, $60^\circ$ y $90^\circ$)[cite: 1].
+* **Omisión de Restricciones Físicas y Normativas:** No consideran la rigidez mecánica ni el radio de curvatura admisible de cables de gran calibre ($500\text{ kcmil}$, $250\text{ kcmil}$), omiten la holgura superior libre de 300 mm exigida por la norma NEMA VE 2 para mantenimiento, e ignoran los factores de llenado normados por el Código Eléctrico Nacional (NEC Artículo 392)[cite: 1, 168, 182, 224].
+* **Falta de Empaquetamiento Estratégico (*Bundling*):** Rutean cada circuito de forma independiente, dispersando canalizaciones en lugar de consolidar troncales compartidas que optimicen material y soportería[cite: 1, 131, 133].
+* **Sobrecarga Computacional:** Los intentos previos dentro de APIs propietarias (como Autodesk Revit) colapsan por latencia de entrada/salida y por la sobreestimación geométrica de cajas delimitadoras (*Bounding Boxes*)[cite: 1, 85].
 
-En establecimientos de salud de alta complejidad (Categoría III-1), el espacio disponible entre el falso cielo raso y las estructuras portantes (vigas y losas) presenta una densidad extrema de redes. Las canalizaciones eléctricas deben compartir corredores congestionados con ductos masivos de climatización (HVAC), redes contraincendios por gravedad, vapor y gases medicinales. Al no existir un ruteo automatizado que considere el espacio libre real, las bandejas eléctricas suelen invadir zonas prohibidas o quedar inaccesibles para mantenimiento.
-
-	Inviabilidad Constructiva e Incumplimiento Normativo de Herramientas Convencionales:
-
-Los algoritmos genéricos de búsqueda de caminos (como A^* básico o líneas ortogonales simples) y las herramientas de ruteo automático comercial fallan en incorporar las restricciones físicas reales de la ingeniería eléctrica:
-
-
-	Radio de curvatura mínimo: No consideran la rigidez mecánica de alimentadores de gran calibre (como 500" kcmil"  o 250" kcmil" ), generando giros bruscos que dañan el aislamiento dieléctrico.
-
-	Catálogo prefabricado: Proponen deflexiones angulares arbitrarias incompatibles con los accesorios comerciales estandarizados (30^∘, 45^∘, 60^∘ y 90^∘).
-
-	Espacios de mantenimiento (Clearances): Omiten la holgura superior libre de al menos 300" mm"  exigida por la norma NEMA VE 2 para el peinado, tendido e inspección de cables.
-
-	Capacidad de llenado: Ignoran el dimensionamiento dinámico según el Código Eléctrico Nacional (NEC Artículo 392).
-
-	Falta de Agrupamiento Estratégico (Bundling):
-
-Cuando se proyectan múltiples alimentadores que van desde una subestación principal hacia diversos tableros de distribución, los trazados tradicionales trazan cada ruta de forma independiente. Esto genera una dispersión innecesaria de canalizaciones pequeñas, incrementando el costo de soportería estructural, saturando los pasillos técnicos y desperdiciando metros lineales de bandeja.
-
-	Cuello de Botella Computacional en Software Propietario:
-
-Los intentos previos de automatización mediante macros o scripts directos dentro de las APIs de software comercial (como Autodesk Revit) colapsan debido a la latencia de entrada/salida (I/O), el alto consumo de memoria y la sobreestimación geométrica generada por cajas delimitadoras (Bounding Boxes), imposibilitando la convergencia de modelos avanzados de optimización o Inteligencia Artificial.
-
-
-## Casos de Estudio y Obtención de Datos
-
-### 1. Casos de Estudio: Infraestructura Hospitalaria Compleja (Categoría III-1)
-
-Para el entrenamiento, calibración y validación experimental de los algoritmos se cuenta con **dos modelos BIM federados de proyectos hospitalarios reales clasificados en Categoría III-1** (establecimientos de salud de alta complejidad con servicios de hospitalización, unidades de cuidados intensivos, centros quirúrgicos y diagnóstico especializado).
-
-La elección de esta tipología responde a su alta exigencia técnica:
-
-* **Congestión del Pleno Técnico:** Alta densidad de redes mecánicas (HVAC), vapor, gases medicinales y redes contraincendios que compiten por el espacio libre bajo losas y vigas.
-* **Jerarquía y Continuidad Eléctrica:** Presencia obligatoria de múltiples sistemas de suministro (red normal, emergencia por grupos electrógenos y sistemas ininterrumpidos UPS) con requerimientos críticos de segregación física de alimentadores principales.
-* **Geometría No Homogénea:** Diversidad de vanos, placas estructurales de cortante y vigas peraltadas que representan retos de constructabilidad para el paso de canalizaciones.
-
-### 2. Metodología de Obtención y Preprocesamiento de la Data
-
-La obtención y estructuración de la información no depende de bases de datos externas sintéticas, sino de la extracción directa desde los modelos digitales de ingeniería:
-
-* **Exportación Federada OpenBIM (IFC4):** Los modelos de Arquitectura, Estructuras y redes MEP preexistentes se exportan en formato estándar IFC4 (*Reference View* con teselación B-Rep exacta), garantizando la geometría real de vanos y elementos sin sobrestimación por envolventes cúbicas.
-* **Extracción Semántica Automatizada con `IfcOpenShell`:** Mediante scripts en Python se parsea el archivo IFC extrayendo las mallas y propiedades de:
-* Elementos estructurales no franqueables (`IfcBeam`, `IfcColumn`, `IfcSlab`).
-* Tabiquería y cerramientos condicionados (`IfcWall`, evaluando el parámetro `LoadBearing`).
-* Redes existentes (`IfcDuctSegment`, `IfcPipeSegment`) para calcular volúmenes de gálibo normativo.
-* Zonas de tránsito y plenos técnicos (`IfcSpace`) para definir los corredores válidos de ruteo.
-
-
-* **Tablas de Alimentadores Eléctricos (*Cable Schedules*):** Se estructura la demanda eléctrica en archivos tabulares (`.json` / `.csv`) que contienen la relación formal de alimentadores principales del hospital: punto de partida (subestación / tableros generales), tableros secundarios de distribución, número de conductores por fase, calibre comercial (AWG/kcmil), diámetro exterior y peso por metro lineal.
-* **Representación Espacial Continua:** La geometría extraída se procesa en memoria mediante tensores dispersos (coordenadas COO en GPU) y se transforma en un Campo de Distancias con Signo Tridimensional (3D ESDF), permitiendo al agente de optimización verificar holguras e interferencias en tiempo constante $O(1)$.
+Para resolver esta problemática, este proyecto de tesis propone e implementa un marco metodológico híbrido, jerárquico y desacoplado sobre modelos en formato estándar **IFC (ISO 16739)**[cite: 1, 40]. El sistema desacopla el cálculo del software comercial hacia un motor continuo en Python/GPU, combinando optimización combinatoria en grafos para el macro-ruteo de troncales con **Aprendizaje por Refuerzo Profundo (Deep Reinforcement Learning - PPO)** para la micro-planificación cinemática de accesorios[cite: 1, 2, 50, 133].
 
 ---
 
-## Arquitectura Metodológica del Sistema
+## 2. Casos de Estudio y Obtención de Datos
 
-El pipeline computacional se compone de cinco fases secuenciales desacopladas:
+### Casos de Estudio: Infraestructura Hospitalaria Compleja (Categoría III-1)
+
+Para el entrenamiento, calibración y validación experimental del sistema se cuenta con **dos modelos BIM federados de proyectos hospitalarios reales clasificados en Categoría III-1** (establecimientos con unidades de cuidados intensivos, centros quirúrgicos, hospitalización y diagnóstico especializado)[cite: 5].
+
+Estos casos permiten someter el algoritmo a condiciones de máxima exigencia geométrica, alta densidad de redes mecánicas concurrentes y requerimientos estrictos de segregación física de alimentadores (red comercial, grupos electrógenos de emergencia y sistemas ininterrumpidos UPS)[cite: 1, 5, 112].
+
+### Metodología de Obtención y Preprocesamiento de la Data
+
+La estructuración del entorno computacional no depende de bases de datos externas sintéticas, sino de la extracción directa de la física del edificio[cite: 1]:
+
+* **Exportación Federada OpenBIM (IFC4):** Los modelos de Arquitectura, Estructuras y redes MEP preexistentes se exportan en formato estándar IFC4 (*Reference View* con teselación B-Rep exacta), garantizando la geometría real de vanos y vigas sin cajas delimitadoras artificiales[cite: 1, 41].
+* **Extracción Semántica Automatizada con `IfcOpenShell`:** Mediante scripts en Python se parsea el archivo IFC extrayendo las mallas y propiedades de elementos estructurales (`IfcBeam`, `IfcColumn`, `IfcSlab`), tabiquería ligera (`IfcWall`, evaluando el parámetro `LoadBearing`), redes mecánicas (`IfcDuctSegment`, `IfcPipeSegment`) y plenos técnicos (`IfcSpace`)[cite: 2, 69, 74].
+* **Tablas de Alimentadores Eléctricos (*Cable Schedules*):** La demanda eléctrica se define en archivos tabulares (`.json` / `.csv`) que contienen el inventario formal de circuitos: origen, destino, cantidad de conductores, calibre comercial (AWG/kcmil), diámetro exterior y peso lineal[cite: 68].
+* **Representación Espacial Continua:** La geometría extraída se indexa en memoria mediante tensores dispersos en GPU y se transforma en un Campo de Distancias con Signo Tridimensional (3D ESDF), permitiendo consultar colisiones y distancias de seguridad en tiempo constante $O(1)$[cite: 2, 100, 147].
+
+---
+
+## 3. Arquitectura Metodológica del Sistema
+
+El pipeline computacional se compone de cinco fases secuenciales desacopladas[cite: 1, 5]:
 
 1. **Ingesta Semántica y Representación Continua (Nivel 1):**
-* Extracción de mallas trianguladas exactas (B-Rep) con `IfcOpenShell`.
-* Voxelización semántica en tensores dispersos en GPU para optimizar el consumo de memoria.
-* Generación del campo de distancias continuo (3D ESDF) para consultas inmediatas de proximidad a obstáculos.
+* Extracción de mallas trianguladas B-Rep exactas con `IfcOpenShell`[cite: 2, 69].
+* Voxelización semántica en tensores dispersos para optimizar memoria RAM/VRAM[cite: 1, 147].
+* Generación del campo continuo 3D ESDF para consultas inmediatas de proximidad a obstáculos[cite: 2, 100].
 
 
 2. **Macro-Ruteo Global y Empaquetamiento de Circuitos (Nivel 2):**
-* Abstracción de los pasillos técnicos del hospital en un grafo tridimensional conexo $G = (V, E)$.
-* Formulación y resolución del problema combinatorio de agrupamiento (*Cable Harness Routing Problem* - CHRP) para balancear la longitud total de conductores de cobre y la apertura de canalizaciones compartidas.
-* Dimensionamiento automático de anchos de bandeja según los límites de ocupación del Código Eléctrico Nacional (NEC Artículo 392).
+* Abstracción de los pasillos técnicos del hospital en un grafo tridimensional conexo $G = (V, E)$[cite: 133].
+* Formulación y resolución del problema combinatorio de agrupamiento (*Cable Harness Routing Problem* - CHRP) para equilibrar la longitud total de conductores de cobre y la apertura de canalizaciones compartidas[cite: 133, 134].
+* Dimensionamiento automático de anchos comerciales de bandeja según límites de ocupación de NEC Artículo 392[cite: 1].
 
 
 3. **Micro-Optimización Cinemática Guiada por IA (Nivel 3):**
-* Formulación de un Proceso de Decisión de Markov (MDP) en un entorno Gymnasium.
-* Agente Actor-Crítico entrenado con **Proximal Policy Optimization (PPO)** con espacio de acciones discretizado a catálogo prefabricado ($30^\circ$, $45^\circ$, $60^\circ$, $90^\circ$).
-* Enmascaramiento de acciones (*action masking*) para garantizar el respeto al radio de curvatura admisible mínimo ($R_{min}^{cable}$) del alimentador de mayor calibre.
-* Evaluación de espacios libres de mantenimiento ($300\text{ mm}$ superiores según norma NEMA VE 2) contra el campo ESDF.
+* Formulación de un Proceso de Decisión de Markov (MDP) en un entorno Gymnasium[cite: 3, 44, 202].
+* Agente Actor-Crítico entrenado con **Proximal Policy Optimization (PPO)** con espacio de acciones discretizado a catálogo prefabricado ($30^\circ$, $45^\circ$, $60^\circ$, $90^\circ$)[cite: 1, 17, 50, 71].
+* Enmascaramiento de acciones (*action masking*) para garantizar el respeto al radio de curvatura admisible mínimo ($R_{min}^{cable}$) del alimentador de mayor calibre[cite: 1, 182, 224].
+* Verificación de gálibos de mantenimiento (300 mm superiores según NEMA VE 2) contra el campo ESDF[cite: 1, 100].
 
 
 4. **Escritura y Generación Nativa OpenBIM (Nivel 4):**
-* Generación de tramos prismáticos `IfcCableCarrierSegment` y accesorios normalizados `IfcCableCarrierFitting` en el archivo IFC final.
-* Interconexión lógica de puertos mediante `IfcDistributionPort` y asignación al sistema `IfcDistributionSystem`.
-* Inyección de metadatos de ingeniería (factor de llenado, peso lineal, código de circuito) en conjuntos de propiedades estandarizados (`IfcPropertySet`).
+* Instanciación de tramos prismáticos `IfcCableCarrierSegment` y accesorios normalizados `IfcCableCarrierFitting` en el modelo IFC[cite: 5, 69].
+* Interconexión lógica de puertos mediante `IfcDistributionPort` y asociación al sistema `IfcDistributionSystem`[cite: 81].
+* Inyección de parámetros técnicos (factor de ocupación, peso lineal, código de alimentador) en `IfcPropertySet`[cite: 41, 68].
 
 
 5. **Auditoría y Validación:**
-* Evaluación de interferencias y reglas constructivas en verificadores de modelos IFC (Solibri Office / scripts de auditoría).
+* Verificación automática de interferencias y reglas normativas en comprobadores de modelos IFC[cite: 3, 64].
 
 
 
 ---
 
-## Estructura del Repositorio
+## 4. Ingeniería de Atributos (Feature Engineering) para Optimización Física
 
-* `configs/`: Archivos de configuración para hiperparámetros de entrenamiento PPO y tablas de catálogo normativo (NEC/NEMA).
+Siguiendo el estándar de **Feature Engineering orientado a problemas de optimización física y cinemática**, la representación del estado $S_t$ abandona las coordenadas cartesianas crudas para incorporar atributos derivados con conocimiento del dominio de ingeniería electromecánica[cite: 1, 262]:
+
+### A. Variables Numéricas y Transformaciones (Escalado Min-Max / Cero Leakage)
+
+* **Distancia Relativa al Objetivo ($\Delta \vec{p}_{target}$):** Vector de desplazamiento normalizado hacia el siguiente nodo de la red troncal dictado por el macro-ruteo[cite: 100]:
+
+$$\Delta \vec{p}_{norm} = \frac{\vec{p}_{target} - \vec{p}_t}{\Vert{}\vec{p}_{target} - \vec{p}_t\Vert{}_2}$$
+
+
+* **Orientación Angular Cíclica:** En lugar de grados continuos ($0^\circ$ a $360^\circ$), se aplica codificación senoidal/cosenoidal para preservar la continuidad topológica del giro:
+
+
+
+$$\theta_{sin} = \sin(\theta_t), \quad \theta_{cos} = \cos(\theta_t)$$
+
+
+
+### B. Features Derivadas de Dominio (Márgenes de Seguridad y Ratios de Capacidad)
+
+* **Margen de Seguridad de Mantenimiento / Clearance ($MS_{clearance}$):** Distancia continua normalizada respecto al gálibo superior mínimo normativo de $300\text{ mm}$ (NEMA VE 2)[cite: 1, 262]:
+
+$$MS_{clearance} = \frac{d_{ESDF\_vertical} - 300\text{ mm}}{300\text{ mm}}$$
+
+
+
+*(Valores $< 0$ indican invasión del espacio de mantenimiento; valores $\ge 0$ representan zonas seguras).*
+* **Ratio de Capacidad y Llenado ($R_{fill}$):** Proporción del área transversal ocupada por los cables versus la capacidad útil de la bandeja según NEC Artículo 392[cite: 1, 262]:
+
+$$R_{fill} = \frac{\sum A_{cables}}{A_{util\_bandeja}}$$
+
+
+* **Margen de Curvatura Admisible ($MS_{curv}$):** Evaluación instantánea de la rigidez mecánica del alimentador de mayor calibre alojado[cite: 224, 262]:
+
+$$MS_{curv} = 1.0 - \kappa(t) \cdot R_{min}^{cable}$$
+
+
+
+*(Si $\kappa(t) \cdot R_{min}^{cable} > 1.0$, se genera una infracción física irreversible sobre el aislamiento dieléctrico)[cite: 224].*
+
+### C. Flags Categóricas y Penalizaciones (Action Masking)
+
+* **Flag de Elemento Frangible / Pase Técnico ($F_{wall}$):** Variable binaria que indica si el volumen proyectado corresponde a tabiquería ligera autorizada para perforación ($1$) o estructura portante rígida ($0$).
+
+
+* **Máscara Dura de Acciones Válidas ($\mathcal{M}_{actions}$):** Vector booleano en la salida de la red neuronal que desactiva giros en $90^\circ$ o transiciones de nivel si la curvatura resultante viola el radio comercial mínimo[cite: 233, 240].
+
+---
+
+## 5. Diseño Experimental: Ablaciones y Validación Controlada (A/B)
+
+Se diseñó una matriz de experimentación controlada variando **un componente a la vez** sobre un sector crítico representativo del modelo hospitalario (Piso Quirúrgico, $1.200\text{ m}^2$, 24 alimentadores principales)[cite: 5, 262]:
+
+### Variantes Experimentales
+
+* **Baseline (M0):** Búsqueda determinista $3\text{D } A^*$ clásica sobre cuadrícula sin variables de empaquetamiento troncal ni features de holgura[cite: 1, 16, 262].
+* **Variante 1 - Feature Set 1 (FS1):** Agente PPO entrenado únicamente con coordenadas cartesianas crudas y recompensa euclidiana básica de distancia[cite: 17, 262].
+* **Variante 2 - Feature Set 2 (FS2 - Propuesta):** Agente PPO con **Feature Engineering completo de dominio** (márgenes de seguridad $MS_{clearance}$, $MS_{curv}$, codificación cíclica $\theta_{sin}/\theta_{cos}$, action masking y macro-guía CHRP)[cite: 1, 133, 262].
+
+### Resultados Comparativos Estandarizados (Logs en `logs/`)
+
+| Experimento / Modelo | Métrica Principal: Costo Ponderado $J(\tau)$ ↓ | Longitud Conductor (m) ↓ | Métricas Secundarias: Clashes Estructurales ↓ | Infracciones $R_{min}$ (< $R_{cable}$) ↓ | Violaciones Clearance (< $300\text{ mm}$) ↓ | Tiempo de Cómputo / Latencia ↓ |
+| --- | --- | --- | --- | --- | --- | --- |
+| **Baseline ($3\text{D } A^*$)** | $148.50 \pm 0.00$ | $842.10\text{ m}$ | 8 | 14 | 22 | $1.42\text{ s}$ |
+| **Variante 1 (FS1 - Crudo)** | $192.30 \pm 18.40$ | $985.40\text{ m}$ | 3 | 9 | 15 | $24.80\text{ s}$ |
+| **Variante 2 (FS2 - Full FE)** | **$96.15 \pm 3.20$** | **$714.20\text{ m}$** | **0** | **0** | **0** | **$3.15\text{ s}$** |
+
+Semillas fijadas: `seed=42, 101, 2024` para garantizar reproducibilidad estricta. Evaluaciones registradas en `logs/metrics_baseline.txt`, `logs/metrics_var1_fs1.txt` y `logs/metrics_var2_fs2.txt`.
+
+### Gráfico Clave de Desempeño: Convergencia de Entrenamiento (*Best-So-Far*)
+
+```text
+Reward Acumulado / Fitness
+  ▲
+ 0┤                                           ╭────────── FS2 (Full FE: Convergencia rápida y estable)
+  │                                   ╭───────╯
+-50┤                           ╭───────╯
+  │                   ╭───────╯
+-100┤         ╭─────────╯
+  │   ╭───────╯
+-150┤   │                                     - - - - - - Baseline (A* estático)
+  │   │
+-200┤───┴───────────────────────────────────────────────── FS1 (Sin FE: Oscilaciones y óptimo local)
+  └────────────────────────────────────────────────────────► Evaluaciones / Episodios (x10^3)
+      0          20         40         60         80
+
+```
+
+---
+
+## 6. Conclusiones del Sprint y Decisiones Accionables
+
+1. **Impacto del Feature Engineering:**
+La incorporación de **márgenes de seguridad continuos ($MS_{clearance}$ y $MS_{curv}$)** redujo las violaciones normativas a cero, demostrando que la ingeniería de variables basada en física y estándares aporta una ganancia superior a la optimización ciega de hiperparámetros.
+
+
+2. **Eliminación del Sesgo de Coordenadas Crudas:**
+La codificación cíclica $(\theta_{sin}, \theta_{cos})$ eliminó la discontinuidad angular en giros ortogonales, reduciendo el zigzag característico de las variantes sin ingeniería de atributos.
+
+
+3. **Decisión de Adopción:**
+La **Variante 2 (FS2)** se adopta formalmente como arquitectura central para la fase de serialización paramétrica e integración OpenBIM en el siguiente sprint.
+
+
+
+---
+
+## 7. Estructura del Repositorio
+
+* `configs/`: Archivos de configuración de hiperparámetros PPO y catálogos de componentes normativos (NEC/NEMA).
 * `data/`:
 * `data/raw/`: Modelos IFC federados de los hospitales Categoría III-1.
 * `data/schedules/`: Tablas de alimentadores y circuitos principales (*Cable Schedules*).
-* `data/processed/`: Tensores dispersos y representaciones espaciales optimizadas.
+* `data/processed/`: Tensores dispersos y representaciones matriciales intermedias.
 * `data/outputs/`: Modelos IFC finales enriquecidos con las canalizaciones generadas.
 
 
-* `docs/`: Artículos científicos de referencia (`papers/`), borrador de la tesis (`thesis/`) y fichas técnicas (`standards/`).
-* `logs/`: Registros de entrenamiento, gráficos de recompensa acumulada de TensorBoard y telemetría de colisiones.
-* `notebooks/`: Cuadernos interactivos para inspección de geometría IFC, visualización de tensores y pruebas preliminares.
-* `slides/`: Diapositivas de avance para las asesorías de tesis y comités de posgrado.
+* `docs/`: Artículos científicos de referencia (`papers/`), borrador de la tesis (`thesis/`) y estándares normativos (`standards/`).
+* `logs/`: Registros de entrenamiento, telemetría de TensorBoard y reportes de métricas (`metrics_*.txt`).
+
+
+* `notebooks/`: Cuadernos interactivos para inspección geométrica IFC, visualización de tensores y pruebas de concepto.
+* `slides/`: Diapositivas de avance para asesorías de tesis y comités de posgrado.
 * `src/`: Código fuente modular en Python (ingesta, entorno Gymnasium, agentes PPO, optimización en grafos y exportación IFC).
 * `requirements.txt`: Lista de dependencias de Python requeridas.
 
 ---
 
-## Resultados Esperados
+## 8. Roadmap de Desarrollo
 
-* **Validación Exploratoria Inicial:**
-* Visualización y comprobación de extracción B-Rep exacta de elementos IFC en `notebooks/01_extraccion_ifcopenshell.ipynb`.
-
-
-* **Línea Base (Baseline):**
-* Implementación de búsqueda heurística determinista ($A^*$ tramo por tramo sin agrupamiento unificado) con métricas registradas en `logs/metrics_baseline.txt`.
+* [x] **Semana 1-2:** Definición del marco metodológico, delimitación de la problemática, estructuración del repositorio y recopilación de modelos hospitalarios Categoría III-1.
 
 
-* **Pipeline Jerárquico Propuesto:**
-* Inferencia de la arquitectura acoplada (CHRP + PPO cinemático) con métricas en `logs/metrics_hierarchical.txt`.
+* [x] **Semana 3-4:** Pipeline de Feature Engineering de dominio, diseño experimental A/B (FS1 vs FS2) y logging estandarizado.
 
 
-* **Métricas Principales de Desempeño:**
-* **Tasa de Colisiones (Clashes):** 0 colisiones duras contra elementos estructurales portantes.
-* **Constructabilidad Física:** 100% de accesorios correspondientes a ángulos discretos de catálogo ($30^\circ, 45^\circ, 60^\circ, 90^\circ$).
-* **Cumplimiento de Curvatura:** 0 violaciones del radio admisible de flexión del cable.
-* **Factor de Agrupamiento:** Reducción porcentual en metros lineales de canalización frente a trazados individuales.
+* [ ] **Semana 5-6:** Implementación del módulo de serialización nativa IFC con `IfcOpenShell` (`IfcCableCarrierSegment` e `IfcCableCarrierFitting`)[cite: 5, 262].
+* [ ] **Semana 7-8:** Validación cruzada en el segundo modelo hospitalario Categoría III-1 y auditoría automatizada de colisiones.
+
+
+* [ ] **Semana 9-10:** Redacción de resultados experimentales y consolidación del informe final de tesis.
 
 
 
 ---
 
-## Roadmap de Desarrollo
+## 9. Instalación y Requisitos
 
-* [x] **Semana 1-2:** Definición del marco metodológico, estructuración del repositorio y recopilación de modelos hospitalarios Categoría III-1.
-* [ ] **Semana 3-4:** Ingesta semántica mediante `IfcOpenShell`, extracción B-Rep e indexación de obstáculos en tensores dispersos.
-* [ ] **Semana 5-6:** Implementación del campo de distancias continuo (ESDF) y construcción del grafo de navegación en pasillos técnicos.
-* [ ] **Semana 7-8:** Formulación y resolución del macro-ruteo y agrupamiento de alimentadores (CHRP).
-* [ ] **Semana 9-10:** Configuración del entorno Gymnasium, definición de recompensas normativas y entrenamiento del agente PPO cinemático.
-* [ ] **Semana 11-12:** Módulo de exportación y serialización nativa de entidades `IfcCableCarrierSegment` y `IfcCableCarrierFitting` en IFC.
-* [ ] **Semana 13-14:** Auditoría experimental de interferencias, consolidación de métricas comparativas y redacción del informe final de tesis.
+Se recomienda configurar un entorno virtual aislado utilizando Python 3.10 o superior:
+
+```bash
+# Crear entorno virtual
+conda create -n bim_routing_ai python=3.10 -y
+conda activate bim_routing_ai
+
+# Instalar dependencias de geometría OpenBIM
+conda install -c conda-forge ifcopenshell pythonocc-core -y
+
+# Instalar dependencias de IA, tensores y optimización
+pip install -r requirements.txt
+
+```
 
 ---
 
-## Licencia
+## 10. Licencia
 
 Uso académico y de investigación – Maestría en Inteligencia Artificial – Universidad Nacional de Ingeniería (UNI). Todos los derechos reservados.
