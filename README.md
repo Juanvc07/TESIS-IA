@@ -53,7 +53,7 @@ Cumpliendo la regla **«divide primero, transforma después»** (escalado `MinMa
 * **Set A (Baseline - Datos Crudos):** Variables originales sin transformar (`ternas`, `num_conductores`, `diametro_ext_mm`, `peso_lineal_kg_m`, `seccion_mm2`).
 * **Set A+B (Variante 1 - Transformación y Codificación):**
   * Retiro de `seccion_mm2` por alta colinealidad (VIF).
-  * Transformación logarítmica de carga: $\text{log\_peso\_total} = \ln(1 + N_{cond} \cdot W_{lineal})$.
+  * Transformación logarítmica de carga: `log_peso_total` = $\ln(1 + N_{cond} \cdot W_{lineal})$.
   * Codificación *One-Hot* de subsistemas críticos hospitalarios (`es_emergencia`, `es_ups`).
 * **Set A+B+C (Variante 2 - Ingeniería de Dominio Físico Normativo):**
   * **Ratio de Ocupación Normativa (`R_fill_ref`, NEC Art. 392):** Proporción del área transversal total de cobre respecto a la sección útil admisible (40%) de una bandeja de referencia de $300 \times 100\text{ mm}$:
