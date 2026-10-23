@@ -1,0 +1,10 @@
+=== REPORTE REAL DE EJECUCIÓN: Baseline (Set A: Datos Crudos) ===
+ID Experimento : EXP-00
+Timestamp      : 2026-10-23 15:54:45
+Features (5)  : ['ternas', 'num_conductores', 'diametro_ext_mm', 'peso_lineal_kg_m', 'seccion_mm2']
+Validación     : 3-Fold Cross-Validation (seed=42, fit solo en train)
+RMSE por Fold  : Fold 1 = 15.3648 | Fold 2 = 34.9660 | Fold 3 = 5.3531
+RMSE Promedio  : 18.5613 +/- 12.2989
+MAE Promedio   : 7.8255
+Latencia Total : 154.73 ms
+Nota de cambio : Variables originales crudas sin escalado ni formulas fisicas

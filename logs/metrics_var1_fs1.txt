@@ -1,0 +1,10 @@
+=== REPORTE REAL DE EJECUCIÓN: Variante 1 (Set A+B: Transformados) ===
+ID Experimento : EXP-01
+Timestamp      : 2026-10-23 15:54:45
+Features (6)  : ['ternas', 'num_conductores', 'diametro_ext_mm', 'log_peso_total', 'es_emergencia', 'es_ups']
+Validación     : 3-Fold Cross-Validation (seed=42, fit solo en train)
+RMSE por Fold  : Fold 1 = 4.7593 | Fold 2 = 39.0529 | Fold 3 = 5.8993
+RMSE Promedio  : 16.5705 +/- 15.9042
+MAE Promedio   : 8.1397
+Latencia Total : 162.31 ms
+Nota de cambio : Adicion de transformacion log1p, codificacion de sistema y retiro de seccion_mm2 por VIF
