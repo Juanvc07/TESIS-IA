@@ -1,0 +1,10 @@
+=== REPORTE REAL DE EJECUCIÓN: Variante 2 (Set A+B+C: Full Dominio FE) ===
+ID Experimento : EXP-02
+Timestamp      : 2026-10-23 15:54:45
+Features (7)  : ['R_fill_ref', 'MS_curv_ref', 'flag_infraccion_curv', 'log_peso_total', 'diametro_ext_mm', 'es_emergencia', 'es_ups']
+Validación     : 3-Fold Cross-Validation (seed=42, fit solo en train)
+RMSE por Fold  : Fold 1 = 3.1332 | Fold 2 = 41.7070 | Fold 3 = 5.5171
+RMSE Promedio  : 16.7858 +/- 17.6488
+MAE Promedio   : 7.6332
+Latencia Total : 165.76 ms
+Nota de cambio : Incorporacion de ratios normativos NEC 392 (R_fill_ref) y margen de curvatura (MS_curv_ref)

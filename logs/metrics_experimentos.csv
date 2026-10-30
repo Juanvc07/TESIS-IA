@@ -1,0 +1,4 @@
+exp_id,timestamp,variante,num_features,rmse_fold1,rmse_fold2,rmse_fold3,rmse_mean,rmse_std,mae_mean,latencia_ms,ruta_log,notas
+EXP-00,2026-10-23 15:54:45,Baseline (Set A: Datos Crudos),5,15.3648,34.966,5.3531,18.5613,12.2989,7.8255,154.73,logs/metrics_baseline.txt,Variables originales crudas sin escalado ni formulas fisicas
+EXP-01,2026-10-23 15:54:45,Variante 1 (Set A+B: Transformados),6,4.7593,39.0529,5.8993,16.5705,15.9042,8.1397,162.31,logs/metrics_var1_fs1.txt,"Adicion de transformacion log1p, codificacion de sistema y retiro de seccion_mm2 por VIF"
+EXP-02,2026-10-23 15:54:45,Variante 2 (Set A+B+C: Full Dominio FE),7,3.1332,41.707,5.5171,16.7858,17.6488,7.6332,165.76,logs/metrics_var2_fs2.txt,Incorporacion de ratios normativos NEC 392 (R_fill_ref) y margen de curvatura (MS_curv_ref)
